@@ -6,3 +6,8 @@ authors     = ["Jonathan Wahrenberg <jonathan@wahrenberg.com>"]
 license     = "Apache-2.0"
 description = "Core library for Chisel"
 repository  = "https://github.com/Chill-Sam/chisel"
+
+[dependencies]
+
+[dev-dependencies]
+tempfile = "3"
