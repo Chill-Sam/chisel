@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 authors     = ["Jonathan Wahrenberg <jonathan@wahrenberg.com>"]
 license     = "Apache-2.0"
-repository  = "https://github.com/yourname/chisel"
+description = "CLI frontend for Chisel terminal text editor"
+repository  = "https://github.com/Chill-Sam/chisel"
 
 [dependencies]
