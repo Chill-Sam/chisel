@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  # 1. Formatting
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo fmt -- --check
+
+  # 2. Linting
+  clippy:
+    name: Clippy (deny warnings)
+    runs-on: ubuntu-latest
+    needs: fmt
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo clippy --all-targets -- -D warnings
+
+  # 3. Tests & Doc-tests
+  test:
+    name: Tests & Doc-tests
+    runs-on: ubuntu-latest
+    needs: clippy
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo test --all
+
+  # 4. Security Audit
+  audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo install cargo-audit
+      - run: cargo audit --deny warnings --deny advisories
+
+  # 5. Documentation Build
+  doc:
+    name: Documentation
+    runs-on: ubuntu-latest
+    needs: audit
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo doc --no-deps
+
+  # 6. CodeQL Security Scanning
+  codeql:
+    name: CodeQL Scan
+    uses: github/codeql-action/init@v2
+    with:
+      languages: rust
+    # initialization
+  codeql-analyze:
+    needs: codeql
+    name: CodeQL Analyze
+    uses: github/codeql-action/analyze@v2
+

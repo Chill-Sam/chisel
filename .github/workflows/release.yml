@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo build --release
+      - uses: softprops/action-gh-release@v1
+        with:
+          body: "Release ${{ github.ref }}"
+      - uses: actions/upload-release-asset@v1
+        with:
+          asset_path: target/release/chisel
+          asset_name: chisel-${{ github.ref }}-x86_64-unknown-linux-gnu
+          asset_content_type: application/octet-stream
+
