@@ -1,3 +1,1 @@
-fn main() {
-    println!("Hello, world!");
-}
+// SPDX-License-Identifier: Apache-2.0
