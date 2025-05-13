@@ -4,78 +4,61 @@ on:
   pull_request:
     branches: [ main ]
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  # 1. Formatting
   fmt:
-    name: Rustfmt
+    name: Format check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - run: cargo fmt -- --check
+      - run: cargo fmt --all -- --check
 
-  # 2. Linting
   clippy:
-    name: Clippy (deny warnings)
-    runs-on: ubuntu-latest
+    name: Lint (deny warnings)
     needs: fmt
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo clippy --all-targets --all-features -- -D warnings
 
-  # 3. Tests & Doc-tests
   test:
     name: Tests & Doc-tests
-    runs-on: ubuntu-latest
     needs: clippy
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - run: cargo test --all
+      - run: cargo test --workspace --all-features
 
-  # 4. Security Audit
   audit:
-    name: Dependency Audit
-    runs-on: ubuntu-latest
+    name: Dependency audit
     needs: test
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
       - run: cargo install cargo-audit
-      - run: cargo audit --deny warnings --deny advisories
+      - run: cargo audit --deny warnings
 
-  # 5. Documentation Build
   doc:
-    name: Documentation
-    runs-on: ubuntu-latest
+    name: Documentation build
     needs: audit
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - run: cargo doc --no-deps
-
-  # 6. CodeQL Security Scanning
-  codeql:
-    name: CodeQL Scan
-    uses: github/codeql-action/init@v2
-    with:
-      languages: rust
-    # initialization
-  codeql-analyze:
-    needs: codeql
-    name: CodeQL Analyze
-    uses: github/codeql-action/analyze@v2
-
+      - run: cargo doc --workspace --no-deps
